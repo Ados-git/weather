@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kenyan Weather & News Podcasts</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="podcast.css">
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <div class="sidebar">
+        
+    <nav>
+        <a href="index.html">
+            <h1>
+                <img src="iconlogo.png" alt="InfiniCast Logo" 
+            style="width: 65%; max-width: 185px; display : block; margin: 1px auto; 
+                   border-radius: 15px; box-shadow: 0px 6px 12px rgba(250, 182, 182, 0.25); 
+                   padding: 3px; border: 3px solid #FFD700;">
+            </h1>
+        </a>
+        <ul>
+          <li><a href="index.html"><span><i class="fa-solid fa-house fa-2xl" style="color: #63E6BE;"></i></span>Home</a></li>
+          <li><a href="weather.html"><span><i class="fa-solid fa-cloud-sun fa-2xl" style="color: #63E6BE;"></i></span>Weather</a></li>
+          <li><a href="news.html"><span><i class="fa-regular fa-newspaper fa-2xl" style="color: #63E6BE;"></i></span>News</a></li>
+          <li><a href="podcast.html"><span><i class="fa-solid  fa-2xl fa-microphone-lines fa-beat" style="color: #63E6BE;"></i></span>Podcast</a></li>
+          <li><a href="newsaud.html"><span><i class="fa-solid fa-radio fa-2xl" style="color: #63E6BE;"></i></span>News Talks and Radio </a></li>
+          <li><a href="#"><span><i class="fa-solid fa-search fa-2xl" style="color: #63E6BE;" ></i></span>Search</a></li>
+          <li><a href="MeteorVision.html"><span> <i class="fas fa-robot fa-2xl" style="color: #63E6BE;"></i></i></span>MeteorVision</a></li>
+          <li><a href="#"><span><i class="fa-solid fa-bell fa-shake fa-2xl" style="color: #63E6BE;"></i></span>Notifications</a></li>
+          <li><a href="#"><span><i class="fa-regular fa-square-plus fa-2xl" style="color: #63E6BE;"></i></span>Create</a></li>
+             
+            
+            
+        </ul>
+    </nav>
+</div>
+  <!-- Hero Section -->
+<div class="juu">
+  <section id="hero">
+    <h1>Welcome to Kenyan Weather & News Podcasts Chronicles</h1>
+    <p>Welcome to Climate Chronicles, the ultimate destination where weather meets storytelling.
+      Here, we go beyond the forecast—diving into the untold narratives behind shifting climates, extreme storms, and the ever-changing atmosphere.
+    From breaking weather updates to in-depth discussions with meteorologists, farmers, environmentalists, and everyday weather-watchers, 
+    Climate Chronicles delivers insightful, engaging, and real-time reports that connect you to the pulse of our planet.</p>
+    <hr>
+    <div id='buzzsprout-small-player'></div><script type='text/javascript' charset='utf-8' src='https://www.buzzsprout.com/2455981.js?container_id=buzzsprout-small-player&player=small'></script>
+  </section>
+
+  <!-- Pictures and Statement Reports Section -->
+  <section id="reports">
+    <h2>Weather Reports & Trends</h2>
+    <div class="report-container">
+      <div class="report-item">
+        <img src="pic1.webp" alt="Weather Image 1">
+        <p>Bringing real-time weather updates to every corner of Kenya, from the bustling cities to the serene rural landscapes.</p>
+      </div>
+      <div class="report-item">
+        <img src="pic2.webp" alt="Weather Image 2">
+        <p>Stay informed with accurate weather trends and forecasts, helping communities prepare for tomorrow.</p>
+      </div>
+      <div class="report-item">
+        <img src="pic3.webp" alt="Weather Image 3">
+        <p>Empowering Kenyans with data-driven climate insights for better decision-making in daily life and business.</p>
+      </div>
+    </div>
+  </section>
+</div>
+  <!-- Comments and Ratings Section -->
+  <section id="comments-ratings">
+    <h2>Community Discussions</h2>
+    
+    <!-- Rating System -->
+    <div id="rating-system">
+      <h3>Rate this Podcast</h3>
+      <div class="star-rating">
+        <span class="star" data-value="1">★</span>
+        <span class="star" data-value="2">★</span>
+        <span class="star" data-value="3">★</span>
+        <span class="star" data-value="4">★</span>
+        <span class="star" data-value="5">★</span>
+      </div>
+      <div id="rating-feedback"></div>
+      <div id="average-rating"></div>
+    </div>
+    
+    <!-- Comment Form -->
+    <div id="comment-form">
+      <h3>Leave a Comment</h3>
+      <form id="commentForm">
+        <input type="hidden" id="podcast-id" value="1">
+        <div class="form-group">
+          <label for="username">Name:</label>
+          <input type="text" id="username" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+          <label for="comment-text">Comment:</label>
+          <textarea id="comment-text" required placeholder="Share your thoughts about this podcast..."></textarea>
+        </div>
+        <button type="submit">Post Comment</button>
+      </form>
+    </div>
+    
+    <!-- Comments List -->
+    <div id="comments-list">
+      <h3>Community Comments</h3>
+      <div id="comments-container"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <h2>Stay Connected</h2>
+      <p>Follow us for the latest podcast episodes and weather updates.</p>
+      
+      <div class="social-links">
+        <a href="https://instagram.com/yourpage" target="_blank">Instagram</a>
+        <a href="https://twitter.com/yourpage" target="_blank">Twitter</a>
+        <a href="https://facebook.com/yourpage" target="_blank">Facebook</a>
+        <a href="https://www.threads.net/@yourpage" target="_blank">Threads</a>
+      </div>
+
+      <div class="quick-links">
+        <a href="/about">About Us</a>
+        <a href="/episodes">Podcast Episodes</a>
+        <a href="/weather">Weather Trends</a>
+        <a href="/contact">Contact</a>
+      </div>
+
+      <div class="newsletter">
+        <p>Subscribe to our newsletter for updates:</p>
+        <form>
+          <input type="email" placeholder="Enter your email">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+
+      <div class="copyright">
+        <p>&copy; 2025 Kenyan Weather & News Podcasts. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="comments.js"></script>
+  <script src="https://kit.fontawesome.com/f68c4b9d88.js" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Twitter News</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+        }
+        .navbar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px;
+        }
+        .navbar a {
+            color: #1DA1F2;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px 15px;
+            border: 1px solid #1DA1F2;
+            border-radius: 20px;
+        }
+        .navbar a:hover {
+            background-color: #1DA1F2;
+            color: #000;
+        }
+        .twitter-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Live Twitter Feeds</h1>
+    <div class="navbar">
+       
+        <nav>
+            <li>
+                <a href="news.html">News Arena</a>
+            </li>
+        </nav>
+        <hr>
+        <a href="#" onclick="showFeed('news')">News</a>
+        <a href="#" onclick="showFeed('sports')">Sports</a>
+        <a href="#" onclick="showFeed('entertainment')">Entertainment</a>
+        <a href="#" onclick="showFeed('forex')">Forex Market</a>
+        <a href="#" onclick="showFeed('war')">War & Conflict</a>
+        
+    </div>
+    
+
+    <div id="news" class="twitter-container active">
+        <a class="twitter-timeline" href="https://twitter.com/CNN"></a>
+        <a class="twitter-timeline" href="https://twitter.com/citizentvkenya"></a>
+        <a class="twitter-timeline" href="https://twitter.com/BBCBreaking"></a>
+        <a class="twitter-timeline" href="https://twitter.com/AJEnglish"></a>
+        <a class="twitter-timeline" href="https://twitter.com/KBCChannel1"></a>
+    </div>
+    
+    <div id="sports" class="twitter-container">
+        <a class="twitter-timeline" href="https://twitter.com/FabrizioRomano"></a>
+        <a class="twitter-timeline" href="https://twitter.com/SkySports"></a>
+        <a class="twitter-timeline" href="https://twitter.com/premierleague"></a>
+        <a class="twitter-timeline" href="https://twitter.com/FIFAcom"></a>
+        <a class="twitter-timeline" href="https://twitter.com/LaLiga"></a>
+        
+    </div>
+    
+    <div id="entertainment" class="twitter-container">
+        <a class="twitter-timeline" href="https://twitter.com/Billboard"></a>
+        <a class="twitter-timeline" href="https://twitter.com/MTV"></a>
+        <a class="twitter-timeline" href="https://twitter.com/Variety"></a>
+        <a class="twitter-timeline" href="https://twitter.com/RollingStone"></a>
+        <a class="twitter-timeline" href="https://twitter.com/TheAcademy"></a>
+    </div>
+    
+    <div id="forex" class="twitter-container">
+        <a class="twitter-timeline" href="https://twitter.com/markets"></a>
+        <a class="twitter-timeline" href="https://twitter.com/CNBC"></a>
+        <a class="twitter-timeline" href="https://twitter.com/WSJMarkets"></a>
+        <a class="twitter-timeline" href="https://twitter.com/financialtimes"></a>
+        <a class="twitter-timeline" href="https://twitter.com/crypto"></a>
+    </div>
+    
+    <div id="war" class="twitter-container">
+        <a class="twitter-timeline" href="https://twitter.com/Conflicts"></a>
+        <a class="twitter-timeline" href="https://twitter.com/WarMonitors"></a>
+        <a class="twitter-timeline" href="https://twitter.com/AlJazeera_World"></a>
+        <a class="twitter-timeline" href="https://twitter.com/ReutersWorld"></a>
+        <a class="twitter-timeline" href="https://twitter.com/NBCNews"></a>
+    </div>
+
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    <script>
+        function showFeed(category) {
+            let sections = document.querySelectorAll('.twitter-container');
+            sections.forEach(section => section.classList.remove('active'));
+            document.getElementById(category).classList.add('active');
+        }
+    </script>
+</body>
+</html>

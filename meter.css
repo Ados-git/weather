@@ -1,0 +1,49 @@
+/* Sidebar Styles */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 19%;
+    height: 100vh;
+    background: rgba(187, 55, 55, 0.048);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h1 {
+    font-size: 1.5rem;
+    text-decoration: underline;
+    margin-bottom: 20px;
+    color: #861010;
+}
+
+.sidebar nav ul {
+    list-style: none;
+}
+
+.sidebar nav ul li {
+    margin: 15px 0;
+    padding: 10px;
+    border-radius: 10px;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.sidebar nav ul li:hover {
+    background: rgba(24, 32, 146, 0.2);
+    transform: translateX(10px);
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}

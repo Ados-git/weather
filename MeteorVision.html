@@ -1,0 +1,2381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeteorVision | Advanced Weather Classifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="meter.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a86ff;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --info-color: #7209b7;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --white: #ffffff;
+            --gradient-primary: linear-gradient(135deg, #4361ee, #3a0ca3);
+            --gradient-danger: linear-gradient(135deg, #f72585, #b5179e);
+            --gradient-warning: linear-gradient(135deg, #f8961e, #f3722c);
+            --gradient-success: linear-gradient(135deg, #4cc9f0, #4895ef);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.05);
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f5f7fa;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(67, 97, 238, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(244, 63, 94, 0.05) 0%, transparent 20%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
+            animation: shine 8s infinite linear;
+        }
+        
+        @keyframes shine {
+            0% { transform: rotate(30deg) translate(-10%, -10%); }
+            100% { transform: rotate(30deg) translate(10%, 10%); }
+        }
+        
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            font-weight: 300;
+            opacity: 0.9;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+        }
+        
+        @media (min-width: 992px) {
+            .main-content {
+                flex-direction: row;
+                gap: 25px;
+            }
+        }
+        
+        .webcam-section {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 0;
+        }
+        
+        .chat-section {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        
+        .webcam-container {
+            width: 100%;
+            max-width: 500px;
+            height: 350px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .webcam-container video, .webcam-container canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .webcam-placeholder {
+            text-align: center;
+            color: #6c757d;
+            padding: 30px;
+        }
+        
+        .webcam-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            opacity: 0.5;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.2), transparent);
+            transform: translateY(100%);
+            transition: var(--transition);
+        }
+        
+        .btn:hover::after {
+            transform: translateY(0);
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--gradient-success);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 5px 15px rgba(76, 201, 240, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background: var(--gradient-warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            box-shadow: 0 5px 15px rgba(248, 150, 30, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: var(--gradient-danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 5px 15px rgba(247, 37, 133, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            box-shadow: 0 5px 15px rgba(114, 9, 183, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-label {
+            display: block;
+            padding: 14px 24px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+            border: 1px dashed #ced4da;
+        }
+        
+        .file-label:hover {
+            background-color: #e9ecef;
+            border-color: var(--secondary-color);
+        }
+        
+        .file-label i {
+            margin-right: 8px;
+        }
+        
+        .predictions-container {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .predictions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .predictions-header h3 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--primary-color);
+            font-size: 1.3rem;
+        }
+        
+        .confidence-badge {
+            background: var(--light-color);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .confidence-badge i {
+            font-size: 0.7rem;
+        }
+        
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius-sm);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .prediction-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .prediction-item::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--primary-color);
+        }
+        
+        .prediction-label {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .prediction-icon {
+            font-size: 1.1rem;
+        }
+        
+        .prediction-value {
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .confidence-meter {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .confidence-level {
+            height: 100%;
+            background: linear-gradient(90deg, var(--danger-color), var(--warning-color), var(--success-color));
+            width: 0%;
+            transition: width 0.5s ease-out;
+            border-radius: 4px;
+        }
+        
+        .confidence-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.7rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .chat-container {
+            flex: 1;
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            box-shadow: var(--shadow-md);
+            background-color: white;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), 
+                              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="none" stroke="%234361ee" stroke-width="0.5" stroke-opacity="0.1" d="M30,30 Q50,10 70,30 T90,50 T70,70 T50,90 T30,70 T10,50 T30,30 Z"/></svg>');
+            background-size: 200px;
+            background-repeat: repeat;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 85%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            box-shadow: var(--shadow-sm);
+            font-size: 0.95rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .bot-message {
+            background-color: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .user-message {
+            background: var(--gradient-primary);
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+            border-right: 4px solid rgba(255,255,255,0.3);
+        }
+        
+        .user-message .message-time {
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: #6c757d;
+            margin-top: 8px;
+            text-align: right;
+            font-weight: 400;
+        }
+        
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .bot-message .message-header {
+            color: var(--primary-color);
+        }
+        
+        .user-message .message-header {
+            color: white;
+        }
+        
+        .message-header i {
+            font-size: 1.1rem;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            background-color: white;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: var(--border-radius-sm);
+            outline: none;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        
+        .chat-input input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .chat-input button {
+            margin-left: 12px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            background: var(--gradient-primary);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .chat-input button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .weather-details {
+            margin-top: 20px;
+            padding: 25px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(0,0,0,0.05);
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .weather-details h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(67, 97, 238, 0.1);
+            padding-bottom: 10px;
+        }
+        
+        .detail-item {
+            margin-bottom: 12px;
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.05);
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            min-width: 150px;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .detail-label i {
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+        
+        .detail-value {
+            flex: 1;
+        }
+        
+        .risk-high {
+            color: var(--danger-color);
+            font-weight: 700;
+            background: rgba(247, 37, 133, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .risk-medium {
+            color: var(--warning-color);
+            font-weight: 700;
+            background: rgba(248, 150, 30, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .risk-low {
+            color: var(--success-color);
+            font-weight: 700;
+            background: rgba(76, 201, 240, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #495057;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: rgba(0,0,0,0.02);
+            border-radius: var(--border-radius-sm);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #adb5bd;
+            transition: var(--transition);
+        }
+        
+        .status-dot.active {
+            background-color: var(--success-color);
+            box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.3);
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            background-color: rgba(247, 37, 133, 0.1);
+            padding: 12px 15px;
+            border-radius: var(--border-radius-sm);
+            margin-top: 15px;
+            display: none;
+            border-left: 4px solid var(--danger-color);
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-4px); }
+            40%, 60% { transform: translateX(4px); }
+        }
+        
+        .permission-banner {
+            background-color: rgba(67, 97, 238, 0.05);
+            border: 1px solid rgba(67, 97, 238, 0.2);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.2); }
+            70% { box-shadow: 0 0 0 10px rgba(67, 97, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+        }
+        
+        .permission-banner p {
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .permission-banner ul {
+            margin-left: 20px;
+            color: #495057;
+        }
+        
+        .permission-banner li {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .permission-banner li i {
+            color: var(--primary-color);
+            font-size: 0.8rem;
+        }
+        
+        .permission-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .hazard-list {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .hazard-item {
+            color: var(--danger-color);
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .hazard-item::before {
+            content: "⚠️";
+            font-size: 0.8rem;
+        }
+        
+        .safety-card {
+            background-color: rgba(248, 150, 30, 0.05);
+            border-left: 4px solid var(--warning-color);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .safety-card h4 {
+            color: var(--warning-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .safety-card ul {
+            margin-left: 5px;
+        }
+        
+        .safety-card li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .safety-card li::before {
+            content: "•";
+            color: var(--warning-color);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--gradient-danger);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .notification-container {
+            position: relative;
+        }
+        
+        .weather-icon {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.03);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(67, 97, 238, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(67, 97, 238, 0.5);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .webcam-section, .chat-section {
+                width: 100%;
+            }
+            
+            header {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Fancy animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Risk assessment cards */
+        .risk-assessment {
+            background: white;
+            border-radius: var(--border-radius-sm);
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .risk-high-card {
+            border-left-color: var(--danger-color);
+            background: linear-gradient(to right, rgba(247, 37, 133, 0.03), white);
+        }
+        
+        .risk-medium-card {
+            border-left-color: var(--warning-color);
+            background: linear-gradient(to right, rgba(248, 150, 30, 0.03), white);
+        }
+        
+        .risk-low-card {
+            border-left-color: var(--success-color);
+            background: linear-gradient(to right, rgba(76, 201, 240, 0.03), white);
+        }
+        
+        .risk-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Creative notification messages */
+        .notification-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 15px 20px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(150%);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            max-width: 350px;
+            border-left: 5px solid;
+        }
+        
+        .notification-message.show {
+            transform: translateX(0);
+        }
+        
+        .notification-danger {
+            border-left-color: var(--danger-color);
+            background: linear-gradient(to right, white, rgba(247, 37, 133, 0.05));
+        }
+        
+        .notification-warning {
+            border-left-color: var(--warning-color);
+            background: linear-gradient(to right, white, rgba(248, 150, 30, 0.05));
+        }
+        
+        .notification-success {
+            border-left-color: var(--success-color);
+            background: linear-gradient(to right, white, rgba(76, 201, 240, 0.05));
+        }
+        
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+        
+        .notification-danger .notification-icon {
+            color: var(--danger-color);
+        }
+        
+        .notification-warning .notification-icon {
+            color: var(--warning-color);
+        }
+        
+        .notification-success .notification-icon {
+            color: var(--success-color);
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .notification-close:hover {
+            color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        
+        <nav>
+            <a href="index.html">
+                <h1>
+                    <img src="iconlogo.png" alt="InfiniCast Logo" 
+                style="width: 65%; max-width: 185px; display : block; margin: 1px auto; 
+                       border-radius: 15px; box-shadow: 0px 6px 12px rgba(250, 182, 182, 0.25); 
+                       padding: 3px; border: 3px solid #FFD700;">
+                </h1>
+            </a>
+            <ul>
+              <li><a href="index.html"><span><i class="fa-solid fa-house fa-2xl" style="color: #63E6BE;"></i></span>Home</a></li>
+              <li><a href="weather.html"><span><i class="fa-solid fa-cloud-sun fa-2xl" style="color: #63E6BE;"></i></span>Weather</a></li>
+              <li><a href="news.html"><span><i class="fa-regular fa-newspaper fa-2xl" style="color: #63E6BE;"></i></span>News</a></li>
+              <li><a href="podcast.html"><span><i class="fa-solid  fa-2xl fa-microphone-lines fa-beat" style="color: #63E6BE;"></i></span>Podcast</a></li>
+              <li><a href="newsaud.html"><span><i class="fa-solid fa-radio fa-2xl" style="color: #63E6BE;"></i></span>News Talks and Radio </a></li>
+              <li><a href="#"><span><i class="fa-solid fa-search fa-2xl" style="color: #63E6BE;" ></i></span>Search</a></li>
+              <li><a href="MeteorVision.html"><span> <i class="fas fa-robot fa-2xl" style="color: #63E6BE;"></i></i></span>MeteorVision</a></li>
+              <li><a href="#"><span><i class="fa-solid fa-bell fa-shake fa-2xl" style="color: #63E6BE;"></i></span>Notifications</a></li>
+              <li><a href="#"><span><i class="fa-regular fa-square-plus fa-2xl" style="color: #63E6BE;"></i></span>Create</a></li>
+                 
+                
+                
+            </ul>
+        </nav>
+    </div>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-cloud-sun weather-icon floating"></i> MeteorVision</h1>
+            <p class="subtitle">Advanced weather classification with real-time risk assessment and safety recommendations</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="webcam-section">
+                <div class="webcam-container" id="webcam-container">
+                    <div class="webcam-placeholder" id="webcam-placeholder">
+                        <i class="fas fa-camera"></i>
+                        <p>Webcam feed will appear here</p>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="permission-banner" id="permission-banner">
+                        <p><i class="fas fa-shield-alt"></i> MeteorVision needs permissions to:</p>
+                        <ul>
+                            <li><i class="fas fa-video"></i> Access your camera for real-time weather analysis</li>
+                            <li><i class="fas fa-map-marker-alt"></i> Get your location for precise weather reports</li>
+                            <li><i class="fas fa-bell"></i> Send notifications for severe weather alerts</li>
+                        </ul>
+                        <div class="permission-buttons">
+                            <button id="request-permissions" class="btn btn-primary">
+                                <i class="fas fa-check-circle"></i> Allow All
+                            </button>
+                            <button id="skip-permissions" class="btn btn-secondary">
+                                <i class="fas fa-times-circle"></i> Skip
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button id="start-button" class="btn btn-primary">
+                        <i class="fas fa-video"></i>
+                        <span id="start-button-text">Start Webcam</span>
+                        <span id="start-button-loader" class="loading" style="display: none;"></span>
+                    </button>
+                    
+                    <input type="file" id="image-upload" class="file-input" accept="image/*">
+                    <label for="image-upload" class="file-label">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload Weather Image
+                    </label>
+                    
+                    <button id="capture-button" class="btn btn-secondary" disabled>
+                        <i class="fas fa-camera-retro"></i> Capture Current Frame
+                    </button>
+                    
+                    <div class="status-indicator">
+                        <div class="status-dot" id="model-status-dot"></div>
+                        <span id="model-status-text">Model: Not loaded</span>
+                    </div>
+                    
+                    <div class="error-message" id="error-message"></div>
+                </div>
+                
+                <div class="predictions-container" id="predictions-container" style="display: none;">
+                    <div class="predictions-header">
+                        <h3><i class="fas fa-chart-bar"></i> Weather Analysis</h3>
+                        <div class="confidence-badge" id="confidence-badge">
+                            <i class="fas fa-bolt"></i>
+                            <span id="confidence-text">Analyzing...</span>
+                        </div>
+                    </div>
+                    <div id="predictions-list"></div>
+                    <div class="confidence-meter">
+                        <div class="confidence-level" id="confidence-level"></div>
+                    </div>
+                    <div class="confidence-labels">
+                        <span>Low</span>
+                        <span>Medium</span>
+                        <span>High</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-section">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message bot-message">
+                            <div class="message-header">
+                                <i class="fas fa-robot"></i>
+                                <span>MeteorVision Assistant</span>
+                            </div>
+                            Welcome to MeteorVision! I can analyze weather conditions through your camera or uploaded images. 
+                            I'll provide risk assessments and safety recommendations based on what I detect.
+                            <div class="message-time" id="current-time"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <input type="text" id="chat-input" placeholder="Ask about weather conditions...">
+                        <button id="send-button">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button id="details-button" class="btn btn-warning" style="margin-top: 20px; width: 100%;">
+                    <i class="fas fa-file-alt"></i> Generate Detailed Weather Report
+                </button>
+                
+                <div class="weather-details" id="weather-details">
+                    <h3><i class="fas fa-cloud-sun-rain"></i> Detailed Weather Report</h3>
+                    <div id="detailed-info"></div>
+                    <div id="location-info"></div>
+                    <div id="hazards-info"></div>
+                    <div id="safety-info"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification container -->
+    <div id="notification-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script>
+        // DOM Elements
+        const startButton = document.getElementById('start-button');
+        const startButtonText = document.getElementById('start-button-text');
+        const startButtonLoader = document.getElementById('start-button-loader');
+        const captureButton = document.getElementById('capture-button');
+        const imageUpload = document.getElementById('image-upload');
+        const webcamContainer = document.getElementById('webcam-container');
+        const webcamPlaceholder = document.getElementById('webcam-placeholder');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+        const detailsButton = document.getElementById('details-button');
+        const weatherDetails = document.getElementById('weather-details');
+        const predictionsContainer = document.getElementById('predictions-container');
+        const predictionsList = document.getElementById('predictions-list');
+        const modelStatusDot = document.getElementById('model-status-dot');
+        const modelStatusText = document.getElementById('model-status-text');
+        const errorMessage = document.getElementById('error-message');
+        const confidenceLevel = document.getElementById('confidence-level');
+        const confidenceText = document.getElementById('confidence-text');
+        const confidenceBadge = document.getElementById('confidence-badge');
+        const permissionBanner = document.getElementById('permission-banner');
+        const requestPermissionsBtn = document.getElementById('request-permissions');
+        const skipPermissionsBtn = document.getElementById('skip-permissions');
+        const notificationContainer = document.getElementById('notification-container');
+        
+        // App State
+        let model = null;
+        let webcam = null;
+        let maxPredictions = 0;
+        let currentPrediction = null;
+        let userLocation = null;
+        let isWebcamActive = false;
+        let isModelLoaded = false;
+        let predictionInterval = null;
+        let notificationPermission = false;
+        
+        // Weather class information (expanded with creative notifications)
+        const weatherInfo = {
+            'Clear Sky': {
+                risk: "low",
+                riskLevel: 1,
+                precautions: [
+                    "Apply SPF 30+ sunscreen every 2 hours",
+                    "Wear UV-blocking sunglasses",
+                    "Hydrate with at least 8oz of water hourly",
+                    "Wear light, moisture-wicking clothing",
+                    "Seek shade between 10am-4pm when UV peaks"
+                ],
+                hazards: [
+                    "UV index may exceed safe levels",
+                    "Heat index could lead to dehydration",
+                    "Prolonged exposure risks sunburn",
+                    "Potential for heat exhaustion"
+                ],
+                safetyActions: [
+                    "Set phone reminders to reapply sunscreen",
+                    "Carry a portable UV monitor if available",
+                    "Wear a wide-brimmed hat for added protection",
+                    "Monitor for signs of heat stroke"
+                ],
+                description: "Minimal cloud cover with intense solar radiation. UV index typically high even on cooler days.",
+                icon: "☀️",
+                notifications: [
+                    "Sun's out! Don't forget your SPF armor ☀️🛡️",
+                    "UV rays are sneaky! Protection needed even in shade",
+                    "Hydration alert: Clear skies mean faster fluid loss"
+                ]
+            },
+            'Partly Cloudy': {
+                risk: "low",
+                riskLevel: 1,
+                precautions: [
+                    "Carry layered clothing for shifting conditions",
+                    "Keep sunglasses accessible for sunny breaks",
+                    "Have a compact umbrella just in case",
+                    "Monitor weather radar for approaching systems"
+                ],
+                hazards: [
+                    "Sudden weather changes possible",
+                    "UV exposure varies dramatically",
+                    "Temperature fluctuations likely",
+                    "Unexpected precipitation possible"
+                ],
+                safetyActions: [
+                    "Check hourly forecast before prolonged outdoor activities",
+                    "Dress in removable layers for flexibility",
+                    "Keep weather app notifications enabled",
+                    "Identify nearby shelters along your route"
+                ],
+                description: "Variable cloud cover creating alternating sun and shade. Conditions may change rapidly.",
+                icon: "⛅",
+                notifications: [
+                    "Mixed skies ahead! Pack your weather-adjustable gear 🌦️",
+                    "Sunny now, but clouds are fashionably late to the party",
+                    "50% chance of surprises - are you prepared?"
+                ]
+            },
+            'Overcast': {
+                risk: "low",
+                riskLevel: 1,
+                precautions: [
+                    "Carry a waterproof jacket or poncho",
+                    "Wear shoes with good traction",
+                    "Have lighting for reduced visibility",
+                    "Monitor for thunderstorm development"
+                ],
+                hazards: [
+                    "Potential for sudden rain showers",
+                    "Reduced visibility for drivers",
+                    "Cooler temperatures may surprise",
+                    "Possible rapid weather deterioration"
+                ],
+                safetyActions: [
+                    "Check radar for precipitation movement",
+                    "Pre-treat glasses with anti-fog if worn",
+                    "Allow extra travel time for cautious driving",
+                    "Have backup plans for outdoor activities"
+                ],
+                description: "Complete cloud coverage creating diffuse light conditions. Often precedes precipitation.",
+                icon: "☁️",
+                notifications: [
+                    "The sky's wearing its gray suit today ☁️👔",
+                    "Cloudy with a chance of... well, let's find out!",
+                    "Nature's softbox lighting - great for photos, less for solar power"
+                ]
+            },
+            'Rain': {
+                risk: "medium",
+                riskLevel: 2,
+                precautions: [
+                    "Waterproof outer layer essential",
+                    "Anti-slip footwear recommended",
+                    "Protect electronics with waterproof cases",
+                    "Increase following distance when driving",
+                    "Avoid walking through moving water"
+                ],
+                hazards: [
+                    "Slick surfaces increase fall risk",
+                    "Reduced visibility for all transport",
+                    "Possible flash flooding in areas",
+                    "Electrical hazards near downed lines",
+                    "Hypothermia risk in cold rains"
+                ],
+                safetyActions: [
+                    "Activate vehicle headlights (not just DRLs)",
+                    "Seek shelter if lightning develops",
+                    "Monitor local flood warnings",
+                    "Avoid submerged roadways",
+                    "Check basement sump pumps if applicable"
+                ],
+                description: "Liquid precipitation ranging from mist to downpour. Intensity determines risk level.",
+                icon: "🌧️",
+                notifications: [
+                    "Raindrops keep falling... and so might you! Caution advised 🌧️☔",
+                    "It's a wet world out there - tread like you're on banana peels",
+                    "Pro tip: Rain makes concrete 300% more slippery (unofficial stat)"
+                ]
+            },
+            'Thunderstorm': {
+                risk: "high",
+                riskLevel: 3,
+                precautions: [
+                    "Seek substantial shelter immediately",
+                    "Avoid all plumbing and wiring",
+                    "Unplug sensitive electronics",
+                    "Stay away from windows and doors",
+                    "Prepare for possible power outages",
+                    "Monitor emergency alerts"
+                ],
+                hazards: [
+                    "Lightning strike potential",
+                    "Damaging straight-line winds",
+                    "Flash flooding risks",
+                    "Large hail possible",
+                    "Tornado development potential",
+                    "Flying debris danger"
+                ],
+                safetyActions: [
+                    "Move to interior room on lowest floor",
+                    "Crouch low if caught outside",
+                    "Avoid tall isolated objects",
+                    "Stay informed via weather radio",
+                    "Delay travel until storm passes",
+                    "Prepare emergency kit"
+                ],
+                description: "Electrically active storm with potentially severe weather manifestations.",
+                icon: "⛈️",
+                notifications: [
+                    "⚡ THUNDERSTORM ALERT ⚡ This is nature's light show - watch from safety!",
+                    "Warning: The sky is angry! Seek shelter like your life depends on it (it might)",
+                    "CODE RED: Zeus is throwing lightning bolts. Don't be his target!"
+                ]
+            },
+            'Fog': {
+                risk: "medium",
+                riskLevel: 2,
+                precautions: [
+                    "Use low-beam headlights (never high)",
+                    "Reduce speed significantly",
+                    "Increase following distance 5x normal",
+                    "Listen for traffic you can't see",
+                    "Consider delaying travel if dense"
+                ],
+                hazards: [
+                    "Severely limited visibility",
+                    "Other drivers may not use lights",
+                    "Disorientation in unfamiliar areas",
+                    "Multi-vehicle collision risk",
+                    "Air travel disruptions likely"
+                ],
+                safetyActions: [
+                    "Use roadside reflectors as guides",
+                    "Open window to hear other traffic",
+                    "Pull completely off road if stopping",
+                    "Use GPS for navigation assistance",
+                    "Allow triple normal travel time"
+                ],
+                description: "Suspended water droplets reducing visibility to less than 1km. Can form rapidly.",
+                icon: "🌫️",
+                notifications: [
+                    "Pea soup alert! Visibility dropping faster than your phone battery 🌫️",
+                    "Driving in fog? Pretend you're in a horror movie - go SLOW and expect jump scares",
+                    "Pro tip: Your high beams make fog WORSE. Use lows or fog lights"
+                ]
+            },
+            'Snow': {
+                risk: "medium",
+                riskLevel: 2,
+                precautions: [
+                    "Layer clothing for insulation",
+                    "Waterproof outer shell essential",
+                    "Use traction devices on footwear",
+                    "Keep emergency blanket in vehicle",
+                    "Monitor for frostbite warnings"
+                ],
+                hazards: [
+                    "Slippery surfaces everywhere",
+                    "Reduced visibility when falling",
+                    "Hypothermia risk if wet",
+                    "Overexertion from shoveling",
+                    "Carbon monoxide danger if warming car"
+                ],
+                safetyActions: [
+                    "Apply winter driving techniques",
+                    "Check tire tread and pressure",
+                    "Carry sand or cat litter for traction",
+                    "Dress in moisture-wicking layers",
+                    "Limit outdoor exposure time"
+                ],
+                description: "Frozen crystalline precipitation accumulating on surfaces. Intensity determines risk.",
+                icon: "❄️",
+                notifications: [
+                    "❄️ Snow alert! ❄️ The world's turning into a snow globe - drive like you're inside one",
+                    "Winter wonderland warning: Beauty = Danger. Dress like the abominable snowman",
+                    "PSA: Your summer driving skills are now obsolete. Slow down!"
+                ]
+            },
+            'Hail': {
+                risk: "high",
+                riskLevel: 3,
+                precautions: [
+                    "Seek substantial shelter immediately",
+                    "Protect head with sturdy objects",
+                    "Move vehicles under cover if possible",
+                    "Stay away from skylights/windows",
+                    "Cover outdoor plants if time allows"
+                ],
+                hazards: [
+                    "Impact injuries from falling ice",
+                    "Severe property/vehicle damage",
+                    "Total crop destruction possible",
+                    "Roadway ice accumulation",
+                    "Associated tornado risk"
+                ],
+                safetyActions: [
+                    "Use mattresses for added protection",
+                    "Avoid metal objects during storm",
+                    "Document damage for insurance",
+                    "Monitor for flash flooding after",
+                    "Check for injuries after storm passes"
+                ],
+                description: "Balls or irregular lumps of ice falling from thunderstorms. Size determines danger.",
+                icon: "🌨️",
+                notifications: [
+                    "⚠️ HAIL WARNING ⚠️ The sky is throwing ice cubes! Take cover NOW",
+                    "EMERGENCY: Golf ball-sized hail reported! Your car isn't armored - protect it!",
+                    "This isn't snow - it's solid ice falling at 100mph! Shelter immediately"
+                ]
+            },
+            'Sandstorm': {
+                risk: "high",
+                riskLevel: 3,
+                precautions: [
+                    "Seek sealed shelter immediately",
+                    "Seal windows and doors with tape",
+                    "Use damp cloth over nose/mouth",
+                    "Protect eyes with goggles",
+                    "Shut down HVAC systems"
+                ],
+                hazards: [
+                    "Severe respiratory distress",
+                    "Zero visibility conditions",
+                    "Abrasive damage to surfaces",
+                    "Electrical equipment failure",
+                    "Extreme disorientation risk"
+                ],
+                safetyActions: [
+                    "Create clean air space in interior room",
+                    "Use air purifiers if available",
+                    "Wet towels under door gaps",
+                    "Prepare for extended confinement",
+                    "Have emergency communications ready"
+                ],
+                description: "High winds carrying abrasive sand particles creating hazardous breathing conditions.",
+                icon: "🌪️",
+                notifications: [
+                    "🚨 SANDSTORM ALERT 🚨 The desert is coming to visit - seal yourself in!",
+                    "EMERGENCY: Inhaling this air is like breathing sandpaper! Stay indoors",
+                    "WARNING: Visibility near zero - don't become a desert artifact"
+                ]
+            },
+            'Hurricane': {
+                risk: "high",
+                riskLevel: 3,
+                precautions: [
+                    "Follow all evacuation orders immediately",
+                    "Board up windows with plywood",
+                    "Secure or bring in outdoor items",
+                    "Fill vehicle gas tanks early",
+                    "Prepare emergency supply kit"
+                ],
+                hazards: [
+                    "Catastrophic wind damage",
+                    "Life-threatening storm surge",
+                    "Torrential flooding rains",
+                    "Extended power outages",
+                    "Contaminated water supplies"
+                ],
+                safetyActions: [
+                    "Identify safest structural area",
+                    "Charge all devices fully",
+                    "Withdraw emergency cash early",
+                    "Document property for insurance",
+                    "Monitor official information sources"
+                ],
+                description: "Tropical cyclone with sustained winds exceeding 74mph. Brings multiple extreme hazards.",
+                icon: "🌀",
+                notifications: [
+                    "🌀 HURRICANE WARNING 🌀 This isn't a drill - follow evacuation orders NOW",
+                    "CATEGORY [X] ALERT: Your location is in the danger zone - move to safety!",
+                    "LAST CHANCE: Storm surge will be deadly. Elevate or evacuate immediately!"
+                ]
+            }
+        };
+        
+        // Initialize the application
+        async function init() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Check for existing permissions
+            checkPermissions();
+            
+            // Load the model
+            try {
+                updateModelStatus('loading');
+                model = await loadModel();
+                maxPredictions = model.getTotalClasses();
+                updateModelStatus('loaded');
+                addBotMessage("MeteorVision analysis engine is ready! I can now assess weather conditions through your camera or uploaded images.");
+            } catch (error) {
+                console.error("Failed to load model:", error);
+                updateModelStatus('error');
+                showError("Failed to load the weather analysis engine. Please refresh and try again.");
+                return;
+            }
+            
+            // Set up event listeners
+            startButton.addEventListener('click', toggleWebcam);
+            captureButton.addEventListener('click', captureAndPredict);
+            imageUpload.addEventListener('change', handleImageUpload);
+            sendButton.addEventListener('click', handleSendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSendMessage();
+            });
+            detailsButton.addEventListener('click', showWeatherDetails);
+            requestPermissionsBtn.addEventListener('click', requestAllPermissions);
+            skipPermissionsBtn.addEventListener('click', () => {
+                permissionBanner.style.display = 'none';
+            });
+            
+            // Try to get user location if permission was previously granted
+            if (localStorage.getItem('locationPermission') === 'granted') {
+                getUserLocation();
+            }
+            
+            // Check notification permission
+            if (Notification.permission === 'granted') {
+                notificationPermission = true;
+            }
+            
+            // Initial welcome message with safety tips
+            setTimeout(() => {
+                addBotMessage(`<div class="risk-assessment risk-low-card">
+                    <div class="risk-title"><i class="fas fa-lightbulb"></i> Pro Tip</div>
+                    For best results, point your camera at the sky or upload clear images of weather conditions. 
+                    I'll analyze and provide real-time risk assessments with safety recommendations.
+                </div>`);
+            }, 1500);
+        }
+        
+        // Check existing permissions
+        function checkPermissions() {
+            // Check if user has previously granted permissions
+            const cameraPermission = localStorage.getItem('cameraPermission') === 'granted';
+            const locationPermission = localStorage.getItem('locationPermission') === 'granted';
+            const notificationPermission = Notification.permission === 'granted';
+            
+            if (cameraPermission && locationPermission && notificationPermission) {
+                permissionBanner.style.display = 'none';
+            }
+            
+            // Enable webcam button if camera permission was granted
+            if (cameraPermission) {
+                startButton.disabled = false;
+            }
+        }
+        
+        // Request all necessary permissions
+        async function requestAllPermissions() {
+            try {
+                // Request camera permission by trying to access webcam
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    stream.getTracks().forEach(track => track.stop());
+                    localStorage.setItem('cameraPermission', 'granted');
+                    addBotMessage(`<div class="risk-assessment risk-low-card">
+                        <div class="risk-title"><i class="fas fa-camera"></i> Camera Access Granted</div>
+                        You can now use real-time weather analysis through your camera. Point it at the sky for best results!
+                    </div>`);
+                    startButton.disabled = false;
+                } catch (error) {
+                    console.error("Camera permission denied:", error);
+                    localStorage.setItem('cameraPermission', 'denied');
+                    addBotMessage(`<div class="risk-assessment risk-medium-card">
+                        <div class="risk-title"><i class="fas fa-video-slash"></i> Camera Restricted</div>
+                        Without camera access, you can still upload images for analysis. Consider enabling later for real-time detection.
+                    </div>`);
+                }
+                
+                // Request location permission
+                getUserLocation(true);
+                
+                // Request notification permission
+                if (Notification.permission !== 'granted') {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        notificationPermission = true;
+                        localStorage.setItem('notificationPermission', 'granted');
+                        addBotMessage(`<div class="risk-assessment risk-low-card">
+                            <div class="risk-title"><i class="fas fa-bell"></i> Alerts Enabled</div>
+                            You'll now receive critical weather alerts for dangerous conditions. Stay safe out there!
+                        </div>`);
+                        showNotification("MeteorVision Alerts", "You'll now receive notifications about severe weather conditions.", 'success');
+                    } else {
+                        localStorage.setItem('notificationPermission', 'denied');
+                        addBotMessage(`<div class="risk-assessment risk-medium-card">
+                            <div class="risk-title"><i class="fas fa-bell-slash"></i> Alerts Disabled</div>
+                            Without notifications, you won't get automatic warnings about dangerous weather. Enable in browser settings if you change your mind.
+                        </div>`);
+                    }
+                }
+                
+                permissionBanner.style.display = 'none';
+            } catch (error) {
+                console.error("Error requesting permissions:", error);
+                showError("There was an error requesting permissions. You can try again later.");
+            }
+        }
+        
+        // Show creative browser notification
+        function showNotification(title, message, type = 'info') {
+            if (!notificationPermission) return;
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification-message notification-${type}`;
+            
+            let icon = 'fa-info-circle';
+            if (type === 'danger') icon = 'fa-exclamation-triangle';
+            if (type === 'warning') icon = 'fa-exclamation-circle';
+            if (type === 'success') icon = 'fa-check-circle';
+            
+            notification.innerHTML = `
+                <i class="fas ${icon} notification-icon"></i>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div>${message}</div>
+                </div>
+                <button class="notification-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            notificationContainer.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            // Close button
+            notification.querySelector('.notification-close').addEventListener('click', () => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            });
+            
+            // Auto-remove after 8 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 8000);
+        }
+        
+        // Load the Teachable Machine model from the new URL
+        async function loadModel() {
+            const modelURL = 'https://teachablemachine.withgoogle.com/models/r6Uc_dwkd/model.json';
+            const metadataURL = 'https://teachablemachine.withgoogle.com/models/r6Uc_dwkd/metadata.json';
+            
+            try {
+                const loadedModel = await tmImage.load(modelURL, metadataURL);
+                isModelLoaded = true;
+                return loadedModel;
+            } catch (error) {
+                console.error("Error loading model:", error);
+                throw error;
+            }
+        }
+        
+        // Toggle webcam on/off
+        async function toggleWebcam() {
+            if (isWebcamActive) {
+                stopWebcam();
+            } else {
+                try {
+                    startButtonText.textContent = "Initializing...";
+                    startButtonLoader.style.display = "inline-block";
+                    startButton.disabled = true;
+                    
+                    await startWebcam();
+                    
+                    startButtonText.textContent = "Stop Analysis";
+                    startButtonLoader.style.display = "none";
+                    startButton.disabled = false;
+                    isWebcamActive = true;
+                    captureButton.disabled = false;
+                    
+                    // Start continuous prediction
+                    predictionInterval = setInterval(predictWebcam, 1000);
+                    
+                    addBotMessage(`<div class="risk-assessment risk-low-card">
+                        <div class="risk-title"><i class="fas fa-video"></i> Live Analysis Active</div>
+                        I'm now analyzing weather conditions in real-time. Point your camera at the sky for best results.
+                        <div style="margin-top: 8px; font-size: 0.8rem; color: #6c757d;">
+                            <i class="fas fa-lightbulb"></i> Tip: Hold steady for 3 seconds for accurate readings
+                        </div>
+                    </div>`);
+                } catch (error) {
+                    console.error("Error starting webcam:", error);
+                    startButtonText.textContent = "Start Webcam";
+                    startButtonLoader.style.display = "none";
+                    startButton.disabled = false;
+                    showError("Could not access the camera. Please ensure permissions are granted.");
+                    
+                    // Show permission banner if camera access was denied
+                    if (error.name === 'NotAllowedError') {
+                        permissionBanner.style.display = 'flex';
+                        localStorage.setItem('cameraPermission', 'denied');
+                    }
+                }
+            }
+        }
+        
+        // Start webcam
+        async function startWebcam() {
+            try {
+                webcam = new tmImage.Webcam(500, 500, true); // width, height, flip
+                await webcam.setup();
+                await webcam.play();
+                
+                // Update the webcam container
+                webcamPlaceholder.style.display = "none";
+                webcamContainer.appendChild(webcam.canvas);
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        // Stop webcam
+        function stopWebcam() {
+            if (webcam) {
+                webcam.stop();
+                webcam = null;
+                
+                // Remove the canvas
+                const canvas = webcamContainer.querySelector('canvas');
+                if (canvas) {
+                    webcamContainer.removeChild(canvas);
+                }
+                
+                webcamPlaceholder.style.display = "flex";
+                isWebcamActive = false;
+                startButtonText.textContent = "Start Webcam";
+                captureButton.disabled = true;
+                
+                // Stop prediction loop
+                if (predictionInterval) {
+                    clearInterval(predictionInterval);
+                    predictionInterval = null;
+                }
+                
+                // Hide predictions
+                predictionsContainer.style.display = "none";
+                
+                addBotMessage(`<div class="risk-assessment risk-low-card">
+                    <div class="risk-title"><i class="fas fa-video-slash"></i> Analysis Paused</div>
+                    Live weather analysis has been stopped. You can restart anytime or upload images for assessment.
+                </div>`);
+            }
+        }
+        
+        // Predict from webcam
+        async function predictWebcam() {
+            if (!isModelLoaded || !webcam) return;
+            
+            try {
+                const prediction = await model.predict(webcam.canvas);
+                displayPredictions(prediction);
+                
+                // Check for high confidence prediction
+                let highestProb = 0;
+                let topClass = "";
+                
+                for (let i = 0; i < maxPredictions; i++) {
+                    if (prediction[i].probability > highestProb) {
+                        highestProb = prediction[i].probability;
+                        topClass = prediction[i].className;
+                    }
+                }
+                
+                // Update confidence meter
+                updateConfidenceMeter(highestProb);
+                
+                // Only notify if confidence is high enough
+                if (highestProb > 0.85 && topClass !== currentPrediction) {
+                    currentPrediction = topClass;
+                    showWeatherInfo(topClass);
+                    
+                    // Send notification for high-risk weather
+                    if (weatherInfo[topClass] && weatherInfo[topClass].riskLevel >= 2) {
+                        const randomNotification = weatherInfo[topClass].notifications[
+                            Math.floor(Math.random() * weatherInfo[topClass].notifications.length)
+                        ];
+                        
+                        let type = 'warning';
+                        if (weatherInfo[topClass].riskLevel >= 3) type = 'danger';
+                        
+                        showNotification("Weather Alert", randomNotification, type);
+                        
+                        if (Notification.permission === 'granted') {
+                            new Notification("MeteorVision Alert", {
+                                body: randomNotification,
+                                icon: 'https://cdn-icons-png.flaticon.com/512/1163/1163661.png'
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Prediction error:", error);
+            }
+        }
+        
+        // Update confidence meter visualization with creative messages
+        function updateConfidenceMeter(confidence) {
+            const percentage = Math.round(confidence * 100);
+            confidenceLevel.style.width = `${percentage}%`;
+            
+            // Update confidence text with creative messages
+            let confidenceMessage = "";
+            let confidenceIcon = "fa-question";
+            
+            if (percentage < 30) {
+                confidenceMessage = "Hmm... not sure yet";
+                confidenceIcon = "fa-question";
+                confidenceBadge.style.background = "rgba(108, 117, 125, 0.1)";
+                confidenceBadge.style.color = "#6c757d";
+            } else if (percentage < 60) {
+                confidenceMessage = "Getting clearer...";
+                confidenceIcon = "fa-search";
+                confidenceBadge.style.background = "rgba(248, 150, 30, 0.1)";
+                confidenceBadge.style.color = "#f8961e";
+            } else if (percentage < 85) {
+                confidenceMessage = "Pretty confident!";
+                confidenceIcon = "fa-thumbs-up";
+                confidenceBadge.style.background = "rgba(76, 201, 240, 0.1)";
+                confidenceBadge.style.color = "#4cc9f0";
+            } else {
+                confidenceMessage = "Certain!";
+                confidenceIcon = "fa-check-double";
+                confidenceBadge.style.background = "rgba(67, 97, 238, 0.1)";
+                confidenceBadge.style.color = "#4361ee";
+            }
+            
+            confidenceText.textContent = `${percentage}% - ${confidenceMessage}`;
+            confidenceBadge.innerHTML = `<i class="fas ${confidenceIcon}"></i><span>${percentage}% - ${confidenceMessage}</span>`;
+            
+            // Change color based on confidence level
+            if (percentage > 85) {
+                confidenceLevel.style.background = "#4361ee"; // Blue
+            } else if (percentage > 60) {
+                confidenceLevel.style.background = "#4cc9f0"; // Teal
+            } else if (percentage > 30) {
+                confidenceLevel.style.background = "#f8961e"; // Orange
+            } else {
+                confidenceLevel.style.background = "#f72585"; // Pink
+            }
+        }
+        
+        // Capture current frame and predict
+        async function captureAndPredict() {
+            if (!isModelLoaded || !webcam) return;
+            
+            try {
+                const prediction = await model.predict(webcam.canvas);
+                displayPredictions(prediction);
+                
+                // Find the top prediction
+                let highestProb = 0;
+                let topClass = "";
+                
+                for (let i = 0; i < maxPredictions; i++) {
+                    if (prediction[i].probability > highestProb) {
+                        highestProb = prediction[i].probability;
+                        topClass = prediction[i].className;
+                    }
+                }
+                
+                // Update confidence meter
+                updateConfidenceMeter(highestProb);
+                
+                currentPrediction = topClass;
+                showWeatherInfo(topClass);
+                
+                addBotMessage(`<div class="risk-assessment risk-low-card">
+                    <div class="risk-title"><i class="fas fa-camera-retro"></i> Snapshot Analyzed</div>
+                    I've processed the current view and detected <strong>${topClass}</strong> conditions with ${Math.round(highestProb * 100)}% confidence.
+                </div>`);
+                
+                // Send notification for high-risk weather
+                if (weatherInfo[topClass] && weatherInfo[topClass].riskLevel >= 2) {
+                    const randomNotification = weatherInfo[topClass].notifications[
+                        Math.floor(Math.random() * weatherInfo[topClass].notifications.length)
+                    ];
+                    
+                    let type = 'warning';
+                    if (weatherInfo[topClass].riskLevel >= 3) type = 'danger';
+                    
+                    showNotification("Weather Alert", randomNotification, type);
+                }
+            } catch (error) {
+                console.error("Capture prediction error:", error);
+                showError("Failed to analyze the captured image. Please try again.");
+            }
+        }
+        
+        // Handle image upload
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            addUserMessage(`Uploaded image: ${file.name}`);
+            
+            try {
+                // Create an image element
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                });
+                
+                // Predict
+                const prediction = await model.predict(img);
+                displayPredictions(prediction);
+                
+                // Find the top prediction
+                let highestProb = 0;
+                let topClass = "";
+                
+                for (let i = 0; i < maxPredictions; i++) {
+                    if (prediction[i].probability > highestProb) {
+                        highestProb = prediction[i].probability;
+                        topClass = prediction[i].className;
+                    }
+                }
+                
+                // Update confidence meter
+                updateConfidenceMeter(highestProb);
+                
+                currentPrediction = topClass;
+                showWeatherInfo(topClass);
+                
+                addBotMessage(`<div class="risk-assessment risk-low-card">
+                    <div class="risk-title"><i class="fas fa-image"></i> Image Analysis Complete</div>
+                    The uploaded image shows <strong>${topClass}</strong> conditions with ${Math.round(highestProb * 100)}% confidence.
+                    ${highestProb > 0.85 ? "That's a strong match!" : "The system is somewhat confident about this assessment."}
+                </div>`);
+                
+                // Send notification for high-risk weather
+                if (weatherInfo[topClass] && weatherInfo[topClass].riskLevel >= 2) {
+                    const randomNotification = weatherInfo[topClass].notifications[
+                        Math.floor(Math.random() * weatherInfo[topClass].notifications.length)
+                    ];
+                    
+                    let type = 'warning';
+                    if (weatherInfo[topClass].riskLevel >= 3) type = 'danger';
+                    
+                    showNotification("Weather Alert", randomNotification, type);
+                }
+            } catch (error) {
+                console.error("Image upload error:", error);
+                showError("Failed to process the uploaded image. Please try another image.");
+            } finally {
+                // Reset the file input
+                event.target.value = '';
+            }
+        }
+        
+        // Display predictions with icons
+        function displayPredictions(predictions) {
+            predictionsList.innerHTML = '';
+            
+            // Sort predictions by probability (highest first)
+            predictions.sort((a, b) => b.probability - a.probability);
+            
+            // Weather icons mapping
+            const weatherIcons = {
+                'Clear Sky': 'fa-sun',
+                'Partly Cloudy': 'fa-cloud-sun',
+                'Overcast': 'fa-cloud',
+                'Rain': 'fa-cloud-rain',
+                'Thunderstorm': 'fa-bolt',
+                'Fog': 'fa-smog',
+                'Snow': 'fa-snowflake',
+                'Hail': 'fa-cloud-meatball',
+                'Sandstorm': 'fa-wind',
+                'Hurricane': 'fa-hurricane'
+            };
+            
+            for (let i = 0; i < predictions.length; i++) {
+                const prediction = predictions[i];
+                const probability = (prediction.probability * 100).toFixed(1);
+                const icon = weatherIcons[prediction.className] || 'fa-question';
+                
+                const item = document.createElement('div');
+                item.className = 'prediction-item';
+                
+                const label = document.createElement('span');
+                label.className = 'prediction-label';
+                label.innerHTML = `<i class="fas ${icon} prediction-icon"></i> ${prediction.className}`;
+                
+                const value = document.createElement('span');
+                value.className = 'prediction-value';
+                value.textContent = `${probability}%`;
+                
+                item.appendChild(label);
+                item.appendChild(value);
+                predictionsList.appendChild(item);
+            }
+            
+            predictionsContainer.style.display = 'block';
+        }
+        
+        // Show weather information with risk assessment
+        function showWeatherInfo(weatherClass) {
+            const info = weatherInfo[weatherClass];
+            if (!info) {
+                addBotMessage(`<div class="risk-assessment risk-medium-card">
+                    <div class="risk-title"><i class="fas fa-question-circle"></i> Unknown Weather Pattern</div>
+                    I detected ${weatherClass} conditions, but don't have specific safety information for this pattern yet.
+                    Please use caution and monitor official weather sources.
+                </div>`);
+                return;
+            }
+            
+            let riskClass = '';
+            let riskCardClass = '';
+            if (info.risk === "high") {
+                riskClass = "risk-high";
+                riskCardClass = "risk-high-card";
+            } else if (info.risk === "medium") {
+                riskClass = "risk-medium";
+                riskCardClass = "risk-medium-card";
+            } else {
+                riskClass = "risk-low";
+                riskCardClass = "risk-low-card";
+            }
+            
+            let message = `
+                <div class="risk-assessment ${riskCardClass}">
+                    <div class="risk-title"><i class="fas ${riskClass === 'risk-high' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i> ${weatherClass} Weather Detected</div>
+                    <div style="margin-bottom: 10px;">${info.description}</div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <div><strong>Risk Level:</strong> <span class="${riskClass}">${info.risk.toUpperCase()} (${info.riskLevel}/3)</span></div>
+                        <div><strong>Confidence:</strong> ${currentPrediction === weatherClass ? Math.round(document.getElementById('confidence-level').style.width.replace('%','')) + '%' : 'Calculating...'}</div>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong><i class="fas fa-shield-alt"></i> Recommended Precautions:</strong>
+                        <ul style="margin-left: 20px; margin-top: 8px;">
+            `;
+            
+            info.precautions.forEach(precaution => {
+                message += `<li>${precaution}</li>`;
+            });
+            
+            message += `
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong><i class="fas fa-exclamation-triangle"></i> Potential Hazards:</strong>
+                        <ul style="margin-left: 20px; margin-top: 8px;">
+            `;
+            
+            info.hazards.forEach(hazard => {
+                message += `<li class="hazard-item">${hazard}</li>`;
+            });
+            
+            message += `
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-top: 15px; font-size: 0.85rem; color: #6c757d;">
+                        <i class="fas fa-lightbulb"></i> For detailed analysis and location-specific advice, click "Generate Detailed Weather Report"
+                    </div>
+                </div>
+            `;
+            
+            addBotMessage(message);
+        }
+        
+        // Show detailed weather report
+        function showWeatherDetails() {
+            if (!currentPrediction) {
+                addBotMessage(`<div class="risk-assessment risk-medium-card">
+                    <div class="risk-title"><i class="fas fa-info-circle"></i> Analysis Needed</div>
+                    Please analyze weather conditions first by using the live camera or uploading an image to generate a detailed report.
+                </div>`);
+                return;
+            }
+            
+            const info = weatherInfo[currentPrediction];
+            const detailsDiv = document.getElementById('detailed-info');
+            const locationDiv = document.getElementById('location-info');
+            const hazardsDiv = document.getElementById('hazards-info');
+            const safetyDiv = document.getElementById('safety-info');
+            
+            let riskClass = '';
+            if (info.risk === "high") riskClass = "risk-high";
+            else if (info.risk === "medium") riskClass = "risk-medium";
+            else riskClass = "risk-low";
+            
+            detailsDiv.innerHTML = `
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-cloud"></i> Condition:</span>
+                    <span class="detail-value">${currentPrediction} ${info.icon}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-align-left"></i> Description:</span>
+                    <span class="detail-value">${info.description}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-thermometer-half"></i> Risk Level:</span>
+                    <span class="detail-value ${riskClass}">${info.risk.toUpperCase()} (${info.riskLevel}/3)</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-clock"></i> Detection Time:</span>
+                    <span class="detail-value">${new Date().toLocaleString()}</span>
+                </div>
+            `;
+            
+            // Add hazards information
+            hazardsDiv.innerHTML = `
+                <h4 style="margin-top: 25px; color: var(--danger-color); display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-exclamation-triangle"></i> Potential Hazards
+                </h4>
+                <div class="safety-card">
+                    <ul class="hazard-list">
+                        ${info.hazards.map(h => `<li>${h}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            // Add safety information
+            safetyDiv.innerHTML = `
+                <h4 style="margin-top: 25px; color: var(--warning-color); display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-shield-alt"></i> Safety Protocol
+                </h4>
+                <div class="safety-card">
+                    <h4 style="color: var(--warning-color);"><i class="fas fa-first-aid"></i> Immediate Actions</h4>
+                    <ul style="margin-left: 5px;">
+                        ${info.safetyActions.map(a => `<li>${a}</li>`).join('')}
+                    </ul>
+                    
+                    <h4 style="margin-top: 15px; color: var(--warning-color);"><i class="fas fa-list-check"></i> Recommended Precautions</h4>
+                    <ul style="margin-left: 5px;">
+                        ${info.precautions.map(p => `<li>${p}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            if (userLocation) {
+                locationDiv.innerHTML = `
+                    <h4 style="margin-top: 25px; color: var(--info-color); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-map-marked-alt"></i> Location Information
+                    </h4>
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-city"></i> Location:</span>
+                        <span class="detail-value">${userLocation.city}, ${userLocation.region}, ${userLocation.country}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-map-pin"></i> Coordinates:</span>
+                        <span class="detail-value">Latitude ${userLocation.lat.toFixed(4)}, Longitude ${userLocation.lon.toFixed(4)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-clock"></i> Local Time:</span>
+                        <span class="detail-value" id="local-time"></span>
+                    </div>
+                `;
+                
+                updateLocalTime();
+                setInterval(updateLocalTime, 1000);
+            } else {
+                locationDiv.innerHTML = `
+                    <h4 style="margin-top: 25px; color: var(--info-color); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-map-marked-alt"></i> Location Information
+                    </h4>
+                    <div class="risk-assessment risk-medium-card">
+                        <div class="risk-title"><i class="fas fa-map-marker-alt"></i> Location Services Disabled</div>
+                        For location-specific weather alerts and more accurate recommendations, please enable location permissions.
+                        <div style="margin-top: 10px;">
+                            <button id="request-location" class="btn btn-info" style="padding: 8px 15px; font-size: 0.9rem;">
+                                <i class="fas fa-location-arrow"></i> Enable Location
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('request-location').addEventListener('click', () => {
+                    getUserLocation(true);
+                });
+            }
+            
+            weatherDetails.style.display = 'block';
+            addBotMessage(`<div class="risk-assessment risk-low-card">
+                <div class="risk-title"><i class="fas fa-file-alt"></i> Report Generated</div>
+                Your detailed ${currentPrediction} weather report is ready below. Scroll down to review safety information and location details.
+            </div>`);
+            
+            // Smooth scroll to details
+            setTimeout(() => {
+                weatherDetails.scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+        }
+        
+        // Get user location with permission handling
+        function getUserLocation(showMessage = false) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        try {
+                            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
+                            const data = await response.json();
+                            
+                            userLocation = {
+                                lat: position.coords.latitude,
+                                lon: position.coords.longitude,
+                                city: data.address.city || data.address.town || data.address.village || "Unknown city",
+                                region: data.address.state || data.address.county || "Unknown region",
+                                country: data.address.country || "Unknown country"
+                            };
+                            
+                            localStorage.setItem('locationPermission', 'granted');
+                            
+                            if (showMessage) {
+                                addBotMessage(`<div class="risk-assessment risk-low-card">
+                                    <div class="risk-title"><i class="fas fa-map-marker-alt"></i> Location Detected</div>
+                                    You're in ${userLocation.city}, ${userLocation.region}. This helps provide hyper-local weather safety advice.
+                                    <div style="margin-top: 8px; font-size: 0.8rem; color: #6c757d;">
+                                        <i class="fas fa-lightbulb"></i> Coordinates: ${userLocation.lat.toFixed(4)}, ${userLocation.lon.toFixed(4)}
+                                    </div>
+                                </div>`);
+                            }
+                            
+                            // Update details if they're already shown
+                            if (weatherDetails.style.display === 'block') {
+                                showWeatherDetails();
+                            }
+                            
+                        } catch (error) {
+                            console.error("Error getting location details:", error);
+                            userLocation = {
+                                lat: position.coords.latitude,
+                                lon: position.coords.longitude
+                            };
+                            localStorage.setItem('locationPermission', 'granted');
+                            
+                            if (showMessage) {
+                                addBotMessage(`<div class="risk-assessment risk-low-card">
+                                    <div class="risk-title"><i class="fas fa-map-marker-alt"></i> Location Detected</div>
+                                    Your coordinates: ${userLocation.lat.toFixed(4)}, ${userLocation.lon.toFixed(4)}
+                                    <div style="margin-top: 8px; font-size: 0.8rem; color: #6c757d;">
+                                        <i class="fas fa-lightbulb"></i> Couldn't resolve city name, but using coordinates for analysis
+                                    </div>
+                                </div>`);
+                            }
+                        }
+                    },
+                    (error) => {
+                        console.error("Geolocation error:", error);
+                        localStorage.setItem('locationPermission', 'denied');
+                        
+                        if (showMessage) {
+                            addBotMessage(`<div class="risk-assessment risk-medium-card">
+                                <div class="risk-title"><i class="fas fa-map-marker-slash"></i> Location Restricted</div>
+                                Without location access, some features may be limited. You can enable this later in settings.
+                            </div>`);
+                        }
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                addBotMessage(`<div class="risk-assessment risk-medium-card">
+                    <div class="risk-title"><i class="fas fa-globe-europe"></i> Geolocation Unavailable</div>
+                    Your browser doesn't support geolocation services. Some location-based features won't be available.
+                </div>`);
+            }
+        }
+        
+        // Update model status indicator
+        function updateModelStatus(status) {
+            switch (status) {
+                case 'loading':
+                    modelStatusDot.style.backgroundColor = '#f8961e';
+                    modelStatusText.textContent = 'Model: Initializing...';
+                    break;
+                case 'loaded':
+                    modelStatusDot.style.backgroundColor = '#4cc9f0';
+                    modelStatusDot.classList.add('active');
+                    modelStatusText.textContent = 'Model: Operational';
+                    isModelLoaded = true;
+                    break;
+                case 'error':
+                    modelStatusDot.style.backgroundColor = '#f72585';
+                    modelStatusText.textContent = 'Model: Offline';
+                    break;
+                default:
+                    modelStatusDot.style.backgroundColor = '#adb5bd';
+                    modelStatusText.textContent = 'Model: Standby';
+            }
+        }
+        
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Chat functions
+        function addBotMessage(text) {
+            addMessage(text, 'bot');
+        }
+        
+        function addUserMessage(text) {
+            addMessage(text, 'user');
+        }
+        
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const header = document.createElement('div');
+            header.className = 'message-header';
+            
+            if (sender === 'bot') {
+                header.innerHTML = `<i class="fas fa-robot"></i><span>MeteorVision Assistant</span>`;
+            } else {
+                header.innerHTML = `<i class="fas fa-user"></i><span>You</span>`;
+            }
+            
+            messageDiv.appendChild(header);
+            
+            const content = document.createElement('div');
+            content.innerHTML = text;
+            messageDiv.appendChild(content);
+            
+            // Add timestamp
+            const now = new Date();
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'message-time';
+            timestampDiv.textContent = formatTime(now);
+            messageDiv.appendChild(timestampDiv);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function handleSendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                addUserMessage(message);
+                chatInput.value = '';
+                
+                // Simple bot responses
+                setTimeout(() => {
+                    const responses = [
+                        "I'm your weather safety assistant. For accurate analysis, please use the camera or upload images.",
+                        "Try clicking 'Start Webcam' for real-time weather assessment.",
+                        "Upload a weather photo for instant analysis and safety tips.",
+                        "After analyzing conditions, click 'Generate Detailed Weather Report' for comprehensive safety information."
+                    ];
+                    
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addBotMessage(randomResponse);
+                }, 1000);
+            }
+        }
+        
+        // Utility functions
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = formatTime(now);
+        }
+        
+        function updateLocalTime() {
+            if (userLocation) {
+                const now = new Date();
+                document.getElementById('local-time').textContent = now.toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    timeZoneName: 'short' 
+                });
+            }
+        }
+        
+        function formatTime(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
